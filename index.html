@@ -2,30 +2,28 @@
 <html>
   <head>
     <meta charset="UTF-8">
-    <title>Abi Dalzim</title>
-    <link rel="icon" href="icon.gif">
+    <title>Abi-Dalzim</title>
+    <link rel="icon" href="media/icon.gif">
     <link href="style.css" rel="stylesheet" type="text/css">
     <script type="text/javascript" src="script.js"></script>
-    <audio id=bell src="media/bell.mp3"></audio>
   </head>
   <body>
-  <div id=header></div>
-  <h1 id=slogan></h1>
-  <div id=main>
-    <div>
-    <textarea id=set rows="8"></textarea>
-    <div>
-      <span id=total></span>
-      <button id=start>Start</button>
-      <span id=progress></span>
+    <audio id=bell src="media/bell.mp3"></audio>
+    <div id=header></div>
+    <h1 id=slogan></h1>
+    <div id=main>
+      <textarea id=set rows="5"></textarea>
+      <div id=panel>
+        <div id=control>
+          <button id=start>Start</button><div id=total></div><div id=progress>0%</div>
+          <ol>
+            <li id=rep0></li>
+            <li id=rep1></li>
+            <li id=rep2></li>
+          </ol>
+        </div><div id=timer>0.0</div>
+      </div>
+      <img id=detail></img><ul id=remarks></ul>
     </div>
-    <div>
-      <input id=head></span><span id=timer>0.0</span>
-    </div>
-    <img id=detail src="rep/rest.jpg"></img>
-    <ul id=remarks></ul>
-    <ol id=tail></ol>
-    </div>
-  </div>
   </body>
 </html>

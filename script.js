@@ -1,106 +1,100 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 
+module.exports = function () {
+  var elements = document.getElementsByTagName("*");
+  var cache = {};
+  for (var i=0; i<elements.length; i++)
+    elements[i].id && (cache[elements[i].id] = elements[i]);
+  return cache;
+}
+
+},{}],2:[function(require,module,exports){
+
 module.exports = function (text) {
   window.prompt("Copy to clipboard: (Ctrl|CMD)+C, Enter", text);
 };
 
-},{}],2:[function(require,module,exports){
+},{}],3:[function(require,module,exports){
 
-var Remarks = require("./remarks.js");
-
-module.exports = function (detail, remarks, name) {
-  detail.src = "rep/"+name+".jpg";
-  while (remarks.firstChild)
-    remarks.removeChild(remarks.firstChild);
-  (Remarks[name]||[]).forEach(function (r) {
-    var li = document.createElement("li");
-    li.innerText = r;
-    remarks.appendChild(li);
-  });
-}
-
-},{"./remarks.js":7}],3:[function(require,module,exports){
-
-var ParseSet = require("./parse-set.js");
-var ParseQueryString = require("./parse-query-string.js");
-var Timer = require("./timer.js");
-var Queue = require("./queue.js");
-var Slogan = require("./slogan.js");
+var Cache = require("./cache.js");
 var Copy = require("./copy.js");
-var Display = require("./display.js");
+var ParseQueryString = require("./parse-query-string.js");
+var ParseSet = require("./parse-set.js");
+var Random = require("./random.js");
+var Remarks = require("./remarks.js");
+var Timer = require("./timer.js");
 
 window.onload = function () {
-  var cache = {};
-  [ "slogan",
-    "timer",
-    "set",
-    "progress",
-    "head",
-    "tail",
-    "detail",
-    "start",
-    "total",
-    "remarks",
-    "bell"
-  ].forEach(function (id) { cache[id] = document.getElementById(id) });
+  var recap = null;
+  var cache = Cache();
   var set;
   var total;
-  cache.slogan.innerText = "Abi-Dalzim: "+Slogan();
+  cache.slogan.innerText = "Abi-Dalzim: "+Random.slogan();
+  cache.detail.src = Random.picture();
+  cache.header.onclick = function () {
+    recap = 3;
+  }
   cache.slogan.onclick = function () {
     Copy(window.location.href.split("?")[0]+"?set="+encodeURIComponent(cache.set.value));
   }
   cache.set.onchange = function () {
     try {
-      set = ParseSet(cache.set.value);
+      set = cache.set.value ? ParseSet(cache.set.value) : [];
     } catch (e) {
-      cache.start.disabled = true;
-      return cache.total.innerText = "Parse error...";
+      set = [];
+      console.dir(e);
+      alert("Parse error: "+e.message);
     }
     total = set.reduce(function (acc, rep) { return acc + rep.duration }, 0);
-    cache.start.disabled = false;
     cache.total.innerText = Math.ceil(total/60)+"min";
+    cache.start.disabled = !total;
   };
-  cache.set.value = ParseQueryString(window.location.search).set;
+  cache.set.value = ParseQueryString(window.location.search).set || "";
   cache.set.onchange();
-  cache.head.onchange = function () {
-    Display(cache.detail, cache.remarks, cache.head.value);
-  }
   cache.start.onclick = function () {
     cache.start.disabled = true;
     cache.set.disabled = true;
-    var queue = Queue(cache.tail, set, 5);
     var current = 0;
     function next () {
+      cache.rep0.innerText = set[0] || "";
+      cache.rep1.innerText = set[1] || "";
+      cache.rep2.innerText = set[2] || "";
+      cache.detail.src = set[0] ? "rep/"+set[0].name+".jpg" : Random.picture();
+      while (remarks.firstChild)
+        cache.remarks.removeChild(remarks.firstChild);
+      ((set[0] && Remarks[set[0].name]) ||[]).forEach(function (r) {
+        var li = document.createElement("li");
+        li.innerText = r;
+        cache.remarks.appendChild(li);
+      });
       cache.bell.currentTime = 0;
       cache.bell.play();
-      cache.progress.innerText = Math.floor(100 * current / total) + "%";
-      var rep = queue();
-      if (rep) {
-        cache.head.value = rep;
-        Display(cache.detail, cache.remarks, rep.name);
-        Timer(cache.timer, rep.duration, function () {
-          current += rep.duration;
+      cache.progress.innerText = Math.floor(100*current/total)+"%";
+      if (set[0]) {
+        Timer(cache.timer, recap || set[0].duration, function () {
+          current += set[0].duration;
+          set.shift();
           next();
         });
       } else {
-        cache.detail.src = "rep/rest.jpg";
-        cache.head.value = "";
         cache.start.disabled = false;
         cache.set.disabled = false;
+        recap = null;
       }
     }
     next();
   };
 };
 
-},{"./copy.js":1,"./display.js":2,"./parse-query-string.js":4,"./parse-set.js":5,"./queue.js":6,"./slogan.js":8,"./timer.js":9}],4:[function(require,module,exports){
+},{"./cache.js":1,"./copy.js":2,"./parse-query-string.js":4,"./parse-set.js":5,"./random.js":6,"./remarks.js":7,"./timer.js":8}],4:[function(require,module,exports){
 
 module.exports = function (search) {
+  if (!search)
+    return {};
   if (search[0] !== "?")
     throw new Error("Not a query string");
-  search = search.substring(1);
   var result = {};
-  search.split("&").forEach(function (binding) {
+  search.substring(1).split("&").forEach(function (binding) {
     var parts = binding.split("=");
     if (parts.length !== 2)
       throw new Error("Incorrect binding: "+binding);
@@ -174,85 +168,45 @@ var sum = (function () {
       Parsec.keyword("*"),
       Parsec.lift(primary, (p) => flaten(Array(n).fill(p)))));
   var term = Parsec.choice([primary, repetition]);
-  var sum = Parsec.lift(Parsec.separate1(term, Parsec.keyword("+")), flaten);
-  var parenthesis = Parsec.enclose(Parsec.keyword("("), sum, Parsec.keyword(")"));
+  var sum = Parsec.lift(Parsec.separate0(term, Parsec.keyword("+")), flaten);
+  var parenthesis = Parsec.between(Parsec.keyword("("), sum, Parsec.keyword(")"));
   primaries.push(atom, parenthesis);
   return sum;
 } ());
 
-module.exports = (input) => Parsec.run(sum, input);
+module.exports = (input) => Parsec.run(Parsec.sequence_([sum, Parsec.Spaces], 0), input);
 
-// module.exports
-// // SUM //
-// module.exports = (function () {
-//   var terms = [];
-//   var term = Parsec.choice(terms);
-//   var sum = Parsec.separate1(term, Parsec.keyword("+"));
-//   var multiplication = Parsec.bind(number, function (n) {
-//     return Parsec.then(
-//       Parsec.keyword("*"),
-//       Parsec.lift(sum, function (s) {
-//         return Array(n).fill(s);
-//       }));
-//   });
-//   var parenthesis = Parsec.enclose(Parsec.keyword("("), sum, Parsec.keyword(")"));
-//   terms.push(atom, multiplication, parenthesis);
-//   return sum;
-// } ());
+},{"parsecjs":9}],6:[function(require,module,exports){
 
-
-
-
-
-// var addition = Parsec.separate(multiplication, Parsec.keyword("+"));
-
-
-// var expressions = [];
-// var expression = Parsec.choice(expressions);
-
-
-// var parenthesis = Parsec.then(
-//   Parsec.keyword("("),
-//   Parsec.bind(expression, function (e) {
-//     return Parsec.lift(
-//       Parsec.keyword(")"),
-//       function () { return e });
-//   }));
-// var multiplication = Parsec.bind(number, function (n) {
-//   return Parsec.then(
-//     Parsec.keyword("*"),
-//     Parsec.lift(expression, function (e) {
-//       return Array(n).fill(e);
-//     }));
-// });
-// var addition = Parsec.separate2(expression, Parsec.keyword("+"));
-// expressions.push(parenthesis, multiplication, addition, exercise);
-
-// module.exports = expression
-
-
-
-},{"parsecjs":10}],6:[function(require,module,exports){
-
-function make (inner) {
-  var li = document.createElement("li");
-  li.innerText = inner;
-  return li;
+function citation (sentence, author) {
+  return "\u201C"+sentence+"\u201D \u2014 "+author;
 }
 
-module.exports = function (list, elements, display) {
-  for (var i=0; i<Math.min(elements.length, display); i++)
-    list.appendChild(make(elements[i]));
-  var j = 0;
-  return function () {
-    var child = list.firstChild;
-    if (list.firstChild) {
-      list.removeChild(list.firstChild);
-      (i < elements.length) && list.appendChild(make(elements[i++]));
-      return elements[j++];
-    }
-  }
-};
+function pick (xs) {
+  return xs[Math.floor(Math.random() * xs.length)];
+}
+
+var slogans = [
+  "Get ripped or die tryin",
+  "Everyday I'm shuffling",
+  citation("No", "Rosa Park"),
+  citation("Hey mec!", "Karim Naili"),
+  "Ever heard of Friendship is Manly?",
+  "Everyday by Rusko (Netsky Remix VIP) is stupidly hardcore"
+];
+
+var pictures = [
+  "media/abi-dalzim.jpg",
+  "media/alexander-popov.jpg",
+  "media/katy-hosszu.gif",
+  "media/swimming-1.jpg",
+  "media/swimming-2.jpg",
+  "media/vitruvian-man.jpg"
+];
+
+exports.slogan = function () { return pick(slogans) };
+
+exports.picture = function () { return pick(pictures) };
 
 },{}],7:[function(require,module,exports){
 
@@ -334,25 +288,6 @@ exports["elastic-butterfly"] = [
 
 },{}],8:[function(require,module,exports){
 
-function citation (sentence, author) {
-  return "\u201C"+sentence+"\u201D \u2014 "+author;
-}
-
-var slogans = [
-  "Get ripped or die tryin",
-  "Everyday I'm shuffling",
-  citation("No", "Rosa Park"),
-  citation("Hey mec!", "Karim Naili"),
-  "Ever heard of Friendship is Manly?",
-  "Everyday by Rusko (Netsky Remix VIP) is stupidly hardcore"
-];
-
-module.exports = function () {
-  return slogans[Math.floor(Math.random() * slogans.length)];
-}
-
-},{}],9:[function(require,module,exports){
-
 module.exports = function (timer, duration, callback) {
   var start = new Date().getTime();
   function tick () {
@@ -363,7 +298,7 @@ module.exports = function (timer, duration, callback) {
   tick();
 }
 
-},{}],10:[function(require,module,exports){
+},{}],9:[function(require,module,exports){
 
 var descriptions = new WeakMap();
 
@@ -528,29 +463,32 @@ exports.Number = exports.lift(exports.regexp(/^[+-]?[0-9]+(\.[0-9]+)?/), JSON.pa
 
 exports.DoubleQuotedString = exports.lift(exports.regexp(/^"(\\.|[^"])*"/), JSON.parse);
 
+exports.keyword = (keyword) => exports.then(exports.Spaces, exports.literal(keyword));
+
+exports.sequence = (parsers) => parsers.length
+  ?exports.bind(parsers[0], (x0) => exports.lift(
+    exports.sequence(parsers.slice(1)),
+    Array.prototype.concat.bind([x0])))
+  :exports.return([])
+
+exports.sequence_ = (parsers, index) => exports.lift(exports.sequence(parsers), (xs) => xs[index])
+
+exports.between = (parser1, parser2, parser3) => exports.sequence_([parser1, parser2, parser3], 1);
+
 exports.some = (parser) => exports.bind(parser, (x0) =>
   exports.lift(exports.many(parser), Array.prototype.concat.bind([x0])));
-
-exports.keyword = (keyword) => exports.then(exports.Spaces, exports.literal(keyword));
 
 exports.separate2 = (parser, separator) => exports.bind(parser, (x0) =>
   exports.lift(exports.some(exports.then(separator, parser)), Array.prototype.concat.bind([x0])));
 
-exports.separate1 = (parser, separator) => exports.choice([
-  exports.separate2(parser, separator),
-  parser
-]);
+exports.separate1 = (parser, separator) => exports.bind(parser, (x0) =>
+  exports.lift(exports.many(exports.then(separator, parser)), Array.prototype.concat.bind([x0])));
 
 exports.separate0 = (parser, separator) => exports.choice([
   exports.separate1(parser, separator),
   exports.return([])
 ]);
 
-exports.enclose = (parser1, parser2, parser3) => exports.then(
-  parser1,
-  exports.bind(
-    parser2,
-    (x) => exports.lift(parser3, () => x)));
 
 
 
