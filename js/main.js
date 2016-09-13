@@ -15,7 +15,7 @@ window.onload = function () {
   cache.slogan.innerText = "Abi-Dalzim: "+Random.slogan();
   cache.detail.src = Random.picture();
   cache.header.onclick = function () {
-    recap = 3;
+    recap = 1;
   }
   cache.slogan.onclick = function () {
     Copy(window.location.href.split("?")[0]+"?set="+encodeURIComponent(cache.set.value));

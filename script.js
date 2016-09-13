@@ -32,7 +32,7 @@ window.onload = function () {
   cache.slogan.innerText = "Abi-Dalzim: "+Random.slogan();
   cache.detail.src = Random.picture();
   cache.header.onclick = function () {
-    recap = 3;
+    recap = 1;
   }
   cache.slogan.onclick = function () {
     Copy(window.location.href.split("?")[0]+"?set="+encodeURIComponent(cache.set.value));
@@ -212,8 +212,33 @@ exports.picture = function () { return pick(pictures) };
 
 // Cardio //
 
+exports["high-knee"] = [
+  "Les genoux doivent monter au niveau des hanches",
+  "Bien amortir les chocs, il ne doit pas y avoir de bruit"
+];
+
+exports["butt-kicker"] = [
+  "Les talons doivent bien remonter aux fesses",
+  "Bien amortir les chocs, il ne doit pas y avoir de bruit"
+];
+
+exports["burpee-2"] = [
+  "Bien descendre les fesses en position accroupie"
+];
+
+exports["burpee"] = exports["burpee-1"] = exports["burpee-pushup"] = [
+  "Ne pas creuser le dos en position de pompe"
+];
+
 exports["mountain-climbing"] = [
   "Ne pas lever les fesses"
+];
+
+
+// Legs //
+
+exports["squat"] = [
+  "Bien sortir les fesses en arrière pour que le dos reste droit"
 ];
 
 // Elbow Planks //
@@ -224,10 +249,10 @@ exports["plank-front"] = [
   "Ne pas lever les fesses sinon c'est tricher"
 ];
 
-exports["plank-left"] = (exports["plank-right"] = [
+exports["plank-left"] = exports["plank-right"] = [
   "Bien rester de profil avec les épaules l'une au dessus de l'autre",
   "Ne pas laisser les fesses s'abaisser"
-]);
+];
 
 exports["plank-back"] = [
   "Bien lever les fesses et esssayer de rester le plus droit possible"
@@ -239,15 +264,15 @@ exports["plank-pushup"] = [
   "Faire le gros dos et sortir les épaules vers le sol"
 ];
 
-exports["plank-leg-left"] = (exports["plank-leg-right"] = [
+exports["plank-leg-left"] = exports["plank-leg-right"] = [
   "Ne pas monter le jambes trop haut pour eviter de lever les fesses"
-]);
+];
 
-exports["plank-arm-left"] = (exports["plank-arm-right"] = [
+exports["plank-arm-left"] = exports["plank-arm-right"] = [
   "Ecarter les jambes pour pouvoir rester de face",
   "Lever le bras au moins au niveau de la tête",
   "Le nazism, c'est mal"
-]);
+];
 
 // Walkup Planks //
 
