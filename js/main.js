@@ -38,14 +38,14 @@ window.onload = function () {
     cache.start.disabled = true;
     cache.set.disabled = true;
     var current = 0;
-    function next () {
-      cache.rep0.innerText = set[0] || "";
-      cache.rep1.innerText = set[1] || "";
-      cache.rep2.innerText = set[2] || "";
-      cache.detail.src = set[0] ? "rep/"+set[0].name+".jpg" : Random.picture();
+    function next (index) {
+      cache.rep0.innerText = set[index+0] || "";
+      cache.rep1.innerText = set[index+1] || "";
+      cache.rep2.innerText = set[index+2] || "";
+      cache.detail.src = set[index] ? "rep/"+set[index].name+".jpg" : Random.picture();
       while (remarks.firstChild)
         cache.remarks.removeChild(remarks.firstChild);
-      ((set[0] && Remarks[set[0].name]) ||[]).forEach(function (r) {
+      ((set[index] && Remarks[set[index].name]) ||[]).forEach(function (r) {
         var li = document.createElement("li");
         li.innerText = r;
         cache.remarks.appendChild(li);
@@ -53,11 +53,10 @@ window.onload = function () {
       cache.bell.currentTime = 0;
       cache.bell.play();
       cache.progress.innerText = Math.floor(100*current/total)+"%";
-      if (set[0]) {
-        Timer(cache.timer, recap || set[0].duration, function () {
-          current += set[0].duration;
-          set.shift();
-          next();
+      if (set[index]) {
+        Timer(cache.timer, recap || set[index].duration, function () {
+          current += set[index].duration;
+          next(index+1);
         });
       } else {
         cache.start.disabled = false;
@@ -65,6 +64,6 @@ window.onload = function () {
         recap = null;
       }
     }
-    next();
+    next(0);
   };
 };

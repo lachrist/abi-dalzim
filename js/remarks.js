@@ -37,6 +37,16 @@ exports["elastic-left-rotator"] = exports["elastic-right-rotator"] = [
   "Controler le mouvement dans le phase de retour"
 ];
 
+exports["elastic-row"] = [
+  "Bomber le torse et rapprocher les homoplates à la fin de la traction",
+  "Seulement les bras doivent bouger, le reste du corps doit rester le plus immobile possible"
+];
+
+exports["elastic-uprow"] = [
+  "Lever les coudes bien haut à la fin de la traction",
+  "Le corps doit rester le plus immobile possible"
+];
+
 /////////////////
 // Elbow-Plank //
 /////////////////
@@ -103,6 +113,13 @@ exports["pushup-large"] = [
   "Toujours controler ses abos; rester gainer et ne pas creuser le dos",
   "Ne pas aller chercher le sol avec sa tête, on reste en position de planche",
   "Si vous avez du mal, ne descendez pas jusqu'au bout"
+];
+
+exports["pushup-serratus"] = [
+  "Ne pas plier les coudes",
+  "Ne pas creuser le dos",
+  "Essayer de toucher les homoplate l'une contre l'autre en descendant",
+  "Faire le gros dos à la fin de la montée"
 ];
 
 //////////////////
