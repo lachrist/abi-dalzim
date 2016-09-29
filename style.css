@@ -3,17 +3,8 @@ body {
   margin: 0px;
 }
 
-#header {
-  vertical-align: middle;
-  cursor: pointer;
-  background-image: url(media/abi-dalzim-cropped.jpg);
-  height: 40px;
-  background-size: auto 40px;
-}
-
 h1 {
   margin: 20px;
-  cursor: pointer;
   font-family: Helvetica, 'Open Sans', Arial, sans-serif;
   font-weight: lighter;
   font-size: 30px;
@@ -26,33 +17,15 @@ h1 {
   margin: auto;
 }
 
-#set {
-  width: 100%;
-  font-family: inherit;
-  font-size: inherit;
-}
+/**********/
+/* panel1 */
+/**********/
 
-#panel {
-  border-bottom: 1px solid black;
-  padding-bottom: 10px;
-  margin-bottom: 10px;
-}
-
-#control {
+#start, #preview, #export, #total, #progress {
   display: inline-block;
   box-sizing: border-box;
-  width: 60%;
-  vertical-align: bottom;
-}
-
-#start, #total, #progress {
-  display: inline-block;
-  box-sizing: border-box;
-  width: 33%;
+  width: 20%;
   vertical-align: center;
-}
-
-#start {
   margin-top: 10px;
   margin-bottom: 10px;
   font-family: inherit;
@@ -63,6 +36,26 @@ h1 {
   text-align: right;
 }
 
+/**********/
+/* editor */
+/**********/
+
+#set {
+  width: 100%;
+  font-family: inherit;
+  font-size: inherit;
+}
+
+/**********/
+/* panel2 */
+/**********/
+
+#panel2 > ol {
+  display: inline-block;
+  box-sizing: border-box;
+  width: 60%;
+}
+
 #timer {
   display: inline-block;
   box-sizing: border-box;
@@ -70,6 +63,15 @@ h1 {
   font-size: 60px;
   vertical-align: bottom;
   text-align: right;
+}
+
+/**********/
+/* panel3 */
+/**********/
+
+#panel3 {
+  border-top: 1px black solid;
+  padding-top: 10px;
 }
 
 #detail {

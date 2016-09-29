@@ -31,10 +31,11 @@ window.onload = function () {
   var total;
   cache.slogan.innerText = "Abi-Dalzim: "+Random.slogan();
   cache.detail.src = Random.picture();
-  cache.header.onclick = function () {
+  cache.preview.onclick = function () {
     recap = 1;
+    cache.start.onclick();
   }
-  cache.slogan.onclick = function () {
+  cache.export.onclick = function () {
     Copy(window.location.href.split("?")[0]+"?set="+encodeURIComponent(cache.set.value));
   }
   cache.set.onchange = function () {
@@ -47,13 +48,12 @@ window.onload = function () {
     }
     total = set.reduce(function (acc, rep) { return acc + rep.duration }, 0);
     cache.total.innerText = Math.ceil(total/60)+"min";
-    cache.start.disabled = !total;
+    cache.start.disabled = cache.preview.disabled = cache.export.disabled = !total;
   };
   cache.set.value = ParseQueryString(window.location.search).set || "";
   cache.set.onchange();
   cache.start.onclick = function () {
-    cache.start.disabled = true;
-    cache.set.disabled = true;
+    cache.start.disabled = cache.preview.disabled = cache.set.disabled = true;
     var current = 0;
     function next (index) {
       cache.rep0.innerText = set[index+0] || "";
@@ -76,8 +76,7 @@ window.onload = function () {
           next(index+1);
         });
       } else {
-        cache.start.disabled = false;
-        cache.set.disabled = false;
+        cache.start.disabled = cache.preview.disabled = cache.set.disabled = false;
         recap = null;
       }
     }
