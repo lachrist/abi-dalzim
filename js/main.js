@@ -17,8 +17,8 @@ window.onload = function () {
   cache.slogan.onclick = function () {
     Copy(window.location.href.split("?")[0]+"?set="+encodeURIComponent(cache.set.value));
   }
-  function activate () { cache.start.disabled = cache.start.set = false }
   cache.set.onchange = function () {
+    debugger;
     try {
       set = cache.set.value ? ParseSet(cache.set.value) : [];
     } catch (e) {
@@ -31,7 +31,7 @@ window.onload = function () {
     cache.start.disabled = true;
     if (set.length) {
       cache.set.disabled = true;
-      Preload(set, activate);
+      Preload(set, function () { cache.start.disabled = cache.start.set = false });
     }
   };
   cache.set.value = ParseQueryString(window.location.search).set || "";

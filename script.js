@@ -34,8 +34,8 @@ window.onload = function () {
   cache.slogan.onclick = function () {
     Copy(window.location.href.split("?")[0]+"?set="+encodeURIComponent(cache.set.value));
   }
-  function activate () { cache.start.disabled = cache.start.set = false }
   cache.set.onchange = function () {
+    debugger;
     try {
       set = cache.set.value ? ParseSet(cache.set.value) : [];
     } catch (e) {
@@ -48,7 +48,7 @@ window.onload = function () {
     cache.start.disabled = true;
     if (set.length) {
       cache.set.disabled = true;
-      Preload(set, activate);
+      Preload(set, function () { cache.start.disabled = cache.start.set = false });
     }
   };
   cache.set.value = ParseQueryString(window.location.search).set || "";
@@ -56,9 +56,7 @@ window.onload = function () {
   function start () {
     cache.set.disabled = true;
     cache.start.innerText = "Pause";
-    cache.start.click = function () {}
-    var current = 0;
-    function next (index) {
+    function next (index, elapsed) {
       cache.rep0.innerText = set[index+0] || "";
       cache.rep1.innerText = set[index+1] || "";
       cache.rep2.innerText = set[index+2] || "";
@@ -72,19 +70,26 @@ window.onload = function () {
       });
       cache.bell.currentTime = 0;
       cache.bell.play();
-      cache.progress.innerText = Math.floor(100*current/total)+"%";
+      cache.progress.innerText = Math.floor(100*elapsed/total)+"%";
       if (set[index]) {
-        Timer(cache.timer, set[index].duration, function () {
-          current += set[index].duration;
-          next(index+1);
+        var cancel = Timer(cache.timer, set[index].duration, function () {
+          next(index+1, elapsed+set[index].duration);
         });
+        cache.start.onclick = function () {
+          cancel();
+          cache.start.innerText = "Resume";
+          cache.start.onclick = function () {
+            cache.start.innerText = "Pause";
+            next(index, elapsed);
+          };
+        }
       } else {
         cache.set.disabled = false;
         cache.start.innerText = "Start";
         cache.start.onclick = start;
       }
     }
-    next(0);
+    next(0, 0);
   }
   cache.start.onclick = start;
 };
@@ -425,6 +430,8 @@ exports["walkup-left"] = [
 
 },{}],9:[function(require,module,exports){
 
+function nil () {}
+
 module.exports = function (timer, duration, callback) {
   var start = new Date().getTime();
   function tick () {
@@ -433,6 +440,7 @@ module.exports = function (timer, duration, callback) {
     rest < 0 ? callback() : setTimeout(tick, 200);
   };
   tick();
+  return function () { tick = nil };
 }
 
 },{}],10:[function(require,module,exports){
