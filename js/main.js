@@ -36,8 +36,10 @@ window.onload = function () {
   };
   cache.set.value = ParseQueryString(window.location.search).set || "";
   cache.set.onchange();
-  cache.start.onclick = function () {
-    cache.start.disabled = cache.set.disabled = true;
+  function start () {
+    cache.set.disabled = true;
+    cache.start.innerText = "Pause";
+    cache.start.click = function () {}
     var current = 0;
     function next (index) {
       cache.rep0.innerText = set[index+0] || "";
@@ -60,9 +62,12 @@ window.onload = function () {
           next(index+1);
         });
       } else {
-        activate();
+        cache.set.disabled = false;
+        cache.start.innerText = "Start";
+        cache.start.onclick = start;
       }
     }
     next(0);
-  };
+  }
+  cache.start.onclick = start;
 };

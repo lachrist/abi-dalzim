@@ -1,14 +1,20 @@
 
 module.exports = function (set, callback) {
-  var srcs = [];
-  function load () { srcs.pop() || callback() }
+  var names = [];
   set.forEach(function (rep) {
-    if (srcs.indexOf(rep.src) !== -1) {
-      srcs.push(rep.src);
+    if (names.indexOf(rep.name) !== -1) {
+      names.push(rep.name);
+      var extensions = ["gif", "png", "jpg"];
       var img = new Image();
-      img.src = rep.src;
-      img.onload = done;
-      img.onerror = function () { alert("404 "+rep.src+" not found") };
+      function preload () {
+        img.src = "rep/"+rep.name+"/"+(extensions.pop()||alert("Could not preload "+rep.name));
+      }
+      img.onload = function () {
+        rep.src = img.src
+        names.pop() || callback();
+      };
+      img.onerror = preload;
+      preload();
     }
   });
 };

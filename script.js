@@ -23,21 +23,18 @@ var ParseSet = require("./parse-set.js");
 var Random = require("./random.js");
 var Remarks = require("./remarks.js");
 var Timer = require("./timer.js");
+var Preload = require("./preload.js");
 
 window.onload = function () {
-  var recap = null;
   var cache = Cache();
   var set;
   var total;
   cache.slogan.innerText = "Abi-Dalzim: "+Random.slogan();
   cache.detail.src = Random.picture();
-  cache.preview.onclick = function () {
-    recap = 1;
-    cache.start.onclick();
-  }
-  cache.export.onclick = function () {
+  cache.slogan.onclick = function () {
     Copy(window.location.href.split("?")[0]+"?set="+encodeURIComponent(cache.set.value));
   }
+  function activate () { cache.start.disabled = cache.start.set = false }
   cache.set.onchange = function () {
     try {
       set = cache.set.value ? ParseSet(cache.set.value) : [];
@@ -48,18 +45,24 @@ window.onload = function () {
     }
     total = set.reduce(function (acc, rep) { return acc + rep.duration }, 0);
     cache.total.innerText = Math.ceil(total/60)+"min";
-    cache.start.disabled = cache.preview.disabled = cache.export.disabled = !total;
+    cache.start.disabled = true;
+    if (set.length) {
+      cache.set.disabled = true;
+      Preload(set, activate);
+    }
   };
   cache.set.value = ParseQueryString(window.location.search).set || "";
   cache.set.onchange();
-  cache.start.onclick = function () {
-    cache.start.disabled = cache.preview.disabled = cache.set.disabled = true;
+  function start () {
+    cache.set.disabled = true;
+    cache.start.innerText = "Pause";
+    cache.start.click = function () {}
     var current = 0;
     function next (index) {
       cache.rep0.innerText = set[index+0] || "";
       cache.rep1.innerText = set[index+1] || "";
       cache.rep2.innerText = set[index+2] || "";
-      cache.detail.src = set[index] ? "rep/"+set[index].name+".jpg" : Random.picture();
+      cache.detail.src = set[index] ? set[index].src : Random.picture();
       while (remarks.firstChild)
         cache.remarks.removeChild(remarks.firstChild);
       ((set[index] && Remarks[set[index].name]) ||[]).forEach(function (r) {
@@ -71,20 +74,22 @@ window.onload = function () {
       cache.bell.play();
       cache.progress.innerText = Math.floor(100*current/total)+"%";
       if (set[index]) {
-        Timer(cache.timer, recap || set[index].duration, function () {
+        Timer(cache.timer, set[index].duration, function () {
           current += set[index].duration;
           next(index+1);
         });
       } else {
-        cache.start.disabled = cache.preview.disabled = cache.set.disabled = false;
-        recap = null;
+        cache.set.disabled = false;
+        cache.start.innerText = "Start";
+        cache.start.onclick = start;
       }
     }
     next(0);
-  };
+  }
+  cache.start.onclick = start;
 };
 
-},{"./cache.js":1,"./copy.js":2,"./parse-query-string.js":4,"./parse-set.js":5,"./random.js":6,"./remarks.js":7,"./timer.js":8}],4:[function(require,module,exports){
+},{"./cache.js":1,"./copy.js":2,"./parse-query-string.js":4,"./parse-set.js":5,"./preload.js":6,"./random.js":7,"./remarks.js":8,"./timer.js":9}],4:[function(require,module,exports){
 
 module.exports = function (search) {
   if (!search)
@@ -99,7 +104,7 @@ module.exports = function (search) {
     result[parts[0]] = decodeURIComponent(parts[1]);
   });
   return result;
-}
+};
 
 },{}],5:[function(require,module,exports){
 
@@ -111,11 +116,6 @@ module.exports = function (search) {
 //          | ATOM
 // ATOM := DURATION NAME
 //       | NUMBER NAME 'in' DURATION
-
-//   3 * (45s front-plank + 15s rest)
-// + 60s rest
-// + 12 * (5 pushup in 15s)
-// + 60s rest
 
 var Parsec = require("parsecjs");
 
@@ -150,7 +150,7 @@ var atom = (function () {
       return Parsec.then(
         Parsec.keyword("in"),
         Parsec.lift(duration, function (d) {
-          return {name:n, duration:d, count:c, toString:motion2string};
+          return {name:n, duration:d, count:c, src:src, toString:motion2string};
         }));
     });
   });
@@ -174,7 +174,29 @@ var sum = (function () {
 
 module.exports = (input) => Parsec.run(Parsec.sequence_([sum, Parsec.Spaces], 0), input);
 
-},{"parsecjs":9}],6:[function(require,module,exports){
+},{"parsecjs":10}],6:[function(require,module,exports){
+
+module.exports = function (set, callback) {
+  var names = [];
+  set.forEach(function (rep) {
+    if (names.indexOf(rep.name) !== -1) {
+      names.push(rep.name);
+      var extensions = ["gif", "png", "jpg"];
+      var img = new Image();
+      function preload () {
+        img.src = "rep/"+rep.name+"/"+(extensions.pop()||alert("Could not preload "+rep.name));
+      }
+      img.onload = function () {
+        rep.src = img.src
+        names.pop() || callback();
+      };
+      img.onerror = preload;
+      preload();
+    }
+  });
+};
+
+},{}],7:[function(require,module,exports){
 
 function citation (sentence, author) {
   return "\u201C"+sentence+"\u201D \u2014 "+author;
@@ -202,11 +224,14 @@ var pictures = [
   "media/vitruvian-man.jpg"
 ];
 
+// Preload images
+pictures.forEach(function (p) { (new Image()).src = p });
+
 exports.slogan = function () { return pick(slogans) };
 
 exports.picture = function () { return pick(pictures) };
 
-},{}],7:[function(require,module,exports){
+},{}],8:[function(require,module,exports){
 
 ////////////
 // Burpee //
@@ -398,7 +423,7 @@ exports["walkup-left"] = [
   "Faire le gros dos en position bras tendu"
 ];
 
-},{}],8:[function(require,module,exports){
+},{}],9:[function(require,module,exports){
 
 module.exports = function (timer, duration, callback) {
   var start = new Date().getTime();
@@ -410,7 +435,7 @@ module.exports = function (timer, duration, callback) {
   tick();
 }
 
-},{}],9:[function(require,module,exports){
+},{}],10:[function(require,module,exports){
 
 var descriptions = new WeakMap();
 

@@ -32,7 +32,7 @@ var atom = (function () {
   function gainage2string () { return this.duration+"s "+this.name }
   var gainage = Parsec.bind(duration, function (d) {
     return Parsec.lift(name, function (n) {
-      return {src:"rep/"+n+".jpg", name:n, duration:d, toString:gainage2string};
+      return {name:n, duration:d, toString:gainage2string};
     });
   });
   function motion2string () { return this.count+" "+this.name+" in "+this.duration+"s" }
@@ -41,7 +41,7 @@ var atom = (function () {
       return Parsec.then(
         Parsec.keyword("in"),
         Parsec.lift(duration, function (d) {
-          return {src:"rep/"+n+".jpg", name:n, duration:d, count:c, src:src, toString:motion2string};
+          return {name:n, duration:d, count:c, src:src, toString:motion2string};
         }));
     });
   });
