@@ -30,7 +30,12 @@ window.onload = function () {
     cache.start.disabled = true;
     if (set.length) {
       cache.set.disabled = true;
-      Preload(set, function () { cache.start.disabled = cache.start.set = false });
+      Preload(set, function (misses) {
+        cache.set.disabled = false;
+        misses.length
+          ? alert("Missing:\n  "+misses.join("\n  "))
+          : (cache.start.disabled = false);
+      });
     }
   };
   cache.set.value = ParseQueryString(window.location.search).set || "";

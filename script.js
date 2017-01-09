@@ -47,7 +47,12 @@ window.onload = function () {
     cache.start.disabled = true;
     if (set.length) {
       cache.set.disabled = true;
-      Preload(set, function () { cache.start.disabled = cache.start.set = false });
+      Preload(set, function (misses) {
+        cache.set.disabled = false;
+        misses.length
+          ? alert("Missing:\n  "+misses.join("\n  "))
+          : (cache.start.disabled = false);
+      });
     }
   };
   cache.set.value = ParseQueryString(window.location.search).set || "";
@@ -182,6 +187,8 @@ module.exports = (input) => Parsec.run(Parsec.sequence_([sum, Parsec.Spaces], 0)
 
 module.exports = function (set, callback) {
   var names = [];
+  var misses = [];
+  function done () { names.pop() || callback(misses) }
   set.forEach(function (rep) {
     if (names.indexOf(rep.name) === -1) {
       names.push(rep.name);
@@ -189,11 +196,14 @@ module.exports = function (set, callback) {
       var img = new Image();
       function preload () {
         var ext = extensions.pop();
-        ext ? (img.src = "rep/"+rep.name+"/"+ext) : alert("Could not preload "+rep.name);
+        if (ext)
+          return img.src = "rep/"+rep.name+"/"+ext
+        misses.push(rep.name);
+        done();
       }
       img.onload = function () {
         rep.src = img.src
-        names.pop() || callback();
+        done();
       };
       img.onerror = preload;
       preload();
