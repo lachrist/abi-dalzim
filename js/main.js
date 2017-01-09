@@ -18,7 +18,6 @@ window.onload = function () {
     Copy(window.location.href.split("?")[0]+"?set="+encodeURIComponent(cache.set.value));
   }
   cache.set.onchange = function () {
-    debugger;
     try {
       set = cache.set.value ? ParseSet(cache.set.value) : [];
     } catch (e) {

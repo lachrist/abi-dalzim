@@ -7,7 +7,8 @@ module.exports = function (set, callback) {
       var extensions = ["gif", "png", "jpg"];
       var img = new Image();
       function preload () {
-        img.src = "rep/"+rep.name+"/"+(extensions.pop()||alert("Could not preload "+rep.name));
+        var ext = extensions.pop();
+        ext ? (img.src = "rep/"+rep.name+"/"+ext) : alert("Could not preload "+rep.name);
       }
       img.onload = function () {
         rep.src = img.src

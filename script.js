@@ -35,7 +35,6 @@ window.onload = function () {
     Copy(window.location.href.split("?")[0]+"?set="+encodeURIComponent(cache.set.value));
   }
   cache.set.onchange = function () {
-    debugger;
     try {
       set = cache.set.value ? ParseSet(cache.set.value) : [];
     } catch (e) {
@@ -189,7 +188,8 @@ module.exports = function (set, callback) {
       var extensions = ["gif", "png", "jpg"];
       var img = new Image();
       function preload () {
-        img.src = "rep/"+rep.name+"/"+(extensions.pop()||alert("Could not preload "+rep.name));
+        var ext = extensions.pop();
+        ext ? (img.src = "rep/"+rep.name+"/"+ext) : alert("Could not preload "+rep.name);
       }
       img.onload = function () {
         rep.src = img.src
