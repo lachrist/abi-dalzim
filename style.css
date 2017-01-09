@@ -25,10 +25,10 @@ h1 {
 /* panel1 */
 /**********/
 
-#start, #preview, #export, #total, #progress {
+#start, #total, #progress {
   display: inline-block;
   box-sizing: border-box;
-  width: 20%;
+  width: 33%;
   vertical-align: center;
   margin-top: 10px;
   margin-bottom: 10px;
