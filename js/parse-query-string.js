@@ -12,4 +12,4 @@ module.exports = function (search) {
     result[parts[0]] = decodeURIComponent(parts[1]);
   });
   return result;
-}
+};

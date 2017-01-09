@@ -6,21 +6,18 @@ var ParseSet = require("./parse-set.js");
 var Random = require("./random.js");
 var Remarks = require("./remarks.js");
 var Timer = require("./timer.js");
+var Preload = require("./preload.js");
 
 window.onload = function () {
-  var recap = null;
   var cache = Cache();
   var set;
   var total;
   cache.slogan.innerText = "Abi-Dalzim: "+Random.slogan();
   cache.detail.src = Random.picture();
-  cache.preview.onclick = function () {
-    recap = 1;
-    cache.start.onclick();
-  }
-  cache.export.onclick = function () {
+  cache.slogan.onclick = function () {
     Copy(window.location.href.split("?")[0]+"?set="+encodeURIComponent(cache.set.value));
   }
+  function activate () { cache.start.disabled = cache.start.set = false }
   cache.set.onchange = function () {
     try {
       set = cache.set.value ? ParseSet(cache.set.value) : [];
@@ -31,18 +28,22 @@ window.onload = function () {
     }
     total = set.reduce(function (acc, rep) { return acc + rep.duration }, 0);
     cache.total.innerText = Math.ceil(total/60)+"min";
-    cache.start.disabled = cache.preview.disabled = cache.export.disabled = !total;
+    cache.start.disabled = true;
+    if (set.length) {
+      cache.set.disabled = true;
+      Preload(set, activate);
+    }
   };
   cache.set.value = ParseQueryString(window.location.search).set || "";
   cache.set.onchange();
   cache.start.onclick = function () {
-    cache.start.disabled = cache.preview.disabled = cache.set.disabled = true;
+    cache.start.disabled = cache.set.disabled = true;
     var current = 0;
     function next (index) {
       cache.rep0.innerText = set[index+0] || "";
       cache.rep1.innerText = set[index+1] || "";
       cache.rep2.innerText = set[index+2] || "";
-      cache.detail.src = set[index] ? "rep/"+set[index].name+".jpg" : Random.picture();
+      cache.detail.src = set[index] ? set[index].src : Random.picture();
       while (remarks.firstChild)
         cache.remarks.removeChild(remarks.firstChild);
       ((set[index] && Remarks[set[index].name]) ||[]).forEach(function (r) {
@@ -54,13 +55,12 @@ window.onload = function () {
       cache.bell.play();
       cache.progress.innerText = Math.floor(100*current/total)+"%";
       if (set[index]) {
-        Timer(cache.timer, recap || set[index].duration, function () {
+        Timer(cache.timer, set[index].duration, function () {
           current += set[index].duration;
           next(index+1);
         });
       } else {
-        cache.start.disabled = cache.preview.disabled = cache.set.disabled = false;
-        recap = null;
+        activate();
       }
     }
     next(0);

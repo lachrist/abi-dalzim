@@ -10,6 +10,10 @@ h1 {
   font-size: 30px;
 }
 
+#slogan {
+  cursor: pointer;
+}
+
 #main {
   font-family: "Lucida Console", Monaco, monospace;
   font-size: 15px;

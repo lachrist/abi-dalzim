@@ -25,6 +25,9 @@ var pictures = [
   "media/vitruvian-man.jpg"
 ];
 
+// Preload images
+pictures.forEach(function (p) { (new Image()).src = p });
+
 exports.slogan = function () { return pick(slogans) };
 
 exports.picture = function () { return pick(pictures) };

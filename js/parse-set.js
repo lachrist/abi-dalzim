@@ -8,11 +8,6 @@
 // ATOM := DURATION NAME
 //       | NUMBER NAME 'in' DURATION
 
-//   3 * (45s front-plank + 15s rest)
-// + 60s rest
-// + 12 * (5 pushup in 15s)
-// + 60s rest
-
 var Parsec = require("parsecjs");
 
 var flaten = (xss) => Array.prototype.concat.apply([], xss);
@@ -37,7 +32,7 @@ var atom = (function () {
   function gainage2string () { return this.duration+"s "+this.name }
   var gainage = Parsec.bind(duration, function (d) {
     return Parsec.lift(name, function (n) {
-      return {name:n, duration:d, toString:gainage2string};
+      return {src:"rep/"+n+".jpg", name:n, duration:d, toString:gainage2string};
     });
   });
   function motion2string () { return this.count+" "+this.name+" in "+this.duration+"s" }
@@ -46,7 +41,7 @@ var atom = (function () {
       return Parsec.then(
         Parsec.keyword("in"),
         Parsec.lift(duration, function (d) {
-          return {name:n, duration:d, count:c, toString:motion2string};
+          return {src:"rep/"+n+".jpg", name:n, duration:d, count:c, src:src, toString:motion2string};
         }));
     });
   });
