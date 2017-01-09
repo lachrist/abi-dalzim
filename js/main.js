@@ -39,9 +39,7 @@ window.onload = function () {
   function start () {
     cache.set.disabled = true;
     cache.start.innerText = "Pause";
-    cache.start.click = function () {}
-    var current = 0;
-    function next (index) {
+    function next (index, elapsed) {
       cache.rep0.innerText = set[index+0] || "";
       cache.rep1.innerText = set[index+1] || "";
       cache.rep2.innerText = set[index+2] || "";
@@ -55,19 +53,26 @@ window.onload = function () {
       });
       cache.bell.currentTime = 0;
       cache.bell.play();
-      cache.progress.innerText = Math.floor(100*current/total)+"%";
+      cache.progress.innerText = Math.floor(100*elapsed/total)+"%";
       if (set[index]) {
-        Timer(cache.timer, set[index].duration, function () {
-          current += set[index].duration;
-          next(index+1);
+        var cancel = Timer(cache.timer, set[index].duration, function () {
+          next(index+1, elapsed+set[index].duration);
         });
+        cache.start.onclick = function () {
+          cancel();
+          cache.start.innerText = "Resume";
+          cache.start.onclick = function () {
+            cache.start.innerText = "Pause";
+            next(index, elapsed);
+          };
+        }
       } else {
         cache.set.disabled = false;
         cache.start.innerText = "Start";
         cache.start.onclick = start;
       }
     }
-    next(0);
+    next(0, 0);
   }
   cache.start.onclick = start;
 };

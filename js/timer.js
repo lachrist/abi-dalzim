@@ -1,4 +1,6 @@
 
+function nil () {}
+
 module.exports = function (timer, duration, callback) {
   var start = new Date().getTime();
   function tick () {
@@ -7,4 +9,5 @@ module.exports = function (timer, duration, callback) {
     rest < 0 ? callback() : setTimeout(tick, 200);
   };
   tick();
+  return function () { tick = nil };
 }
