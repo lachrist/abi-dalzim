@@ -44,14 +44,15 @@ window.onload = function () {
     }
     total = set.reduce(function (acc, rep) { return acc + rep.duration }, 0);
     cache.total.innerText = Math.ceil(total/60)+"min";
-    cache.start.disabled = true;
+    cache.control.disabled = true;
     if (set.length) {
       cache.set.disabled = true;
-      Preload(set, function (misses) {
+      Preload(set, function () {
         cache.set.disabled = false;
+        var misses = set.filter(function (rep) { return rep.src === undefined }).map(function (rep) { return rep.name });
         misses.length
           ? alert("Missing:\n  "+misses.join("\n  "))
-          : (cache.start.disabled = false);
+          : (cache.control.disabled = false);
       });
     }
   };
@@ -59,7 +60,7 @@ window.onload = function () {
   cache.set.onchange();
   function start () {
     cache.set.disabled = true;
-    cache.start.innerText = "Pause";
+    cache.control.innerText = "Pause";
     function next (index, elapsed) {
       cache.rep0.innerText = set[index+0] || "";
       cache.rep1.innerText = set[index+1] || "";
@@ -79,23 +80,24 @@ window.onload = function () {
         var cancel = Timer(cache.timer, set[index].duration, function () {
           next(index+1, elapsed+set[index].duration);
         });
-        cache.start.onclick = function () {
+        cache.control.onclick = function () {
           cancel();
-          cache.start.innerText = "Resume";
-          cache.start.onclick = function () {
-            cache.start.innerText = "Pause";
+          cache.control.innerText = "Resume";
+          cache.control.onclick = function () {
+            cache.control.innerText = "Pause";
             next(index, elapsed);
           };
         }
       } else {
         cache.set.disabled = false;
-        cache.start.innerText = "Start";
-        cache.start.onclick = start;
+        cache.control.innerText = "Start";
+        cache.control.onclick = start;
       }
     }
     next(0, 0);
   }
-  cache.start.onclick = start;
+  cache.control.innerText = "Start";
+  cache.control.onclick = start;
 };
 
 },{"./cache.js":1,"./copy.js":2,"./parse-query-string.js":4,"./parse-set.js":5,"./preload.js":6,"./random.js":7,"./remarks.js":8,"./timer.js":9}],4:[function(require,module,exports){
@@ -159,7 +161,7 @@ var atom = (function () {
       return Parsec.then(
         Parsec.keyword("in"),
         Parsec.lift(duration, function (d) {
-          return {name:n, duration:d, count:c, src:src, toString:motion2string};
+          return {name:n, duration:d, count:c, toString:motion2string};
         }));
     });
   });
@@ -187,8 +189,10 @@ module.exports = (input) => Parsec.run(Parsec.sequence_([sum, Parsec.Spaces], 0)
 
 module.exports = function (set, callback) {
   var names = [];
-  var misses = [];
-  function done () { names.pop() || callback(misses) }
+  function done () {
+    names.pop();
+    names.length || callback();
+  }
   set.forEach(function (rep) {
     if (names.indexOf(rep.name) === -1) {
       names.push(rep.name);
@@ -197,12 +201,12 @@ module.exports = function (set, callback) {
       function preload () {
         var ext = extensions.pop();
         if (ext)
-          return img.src = "rep/"+rep.name+"/"+ext
-        misses.push(rep.name);
-        done();
+          img.src = "rep/"+rep.name+"."+ext;
+        else
+          done();
       }
       img.onload = function () {
-        rep.src = img.src
+        rep.src = img.src;
         done();
       };
       img.onerror = preload;

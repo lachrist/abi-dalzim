@@ -25,7 +25,11 @@ h1 {
 /* panel1 */
 /**********/
 
-#start, #total, #progress {
+#panel1 {
+  font-size: 20px;
+}
+
+#control, #total, #progress {
   display: inline-block;
   box-sizing: border-box;
   width: 33%;

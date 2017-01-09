@@ -1,8 +1,10 @@
 
 module.exports = function (set, callback) {
   var names = [];
-  var misses = [];
-  function done () { names.pop() || callback(misses) }
+  function done () {
+    names.pop();
+    names.length || callback();
+  }
   set.forEach(function (rep) {
     if (names.indexOf(rep.name) === -1) {
       names.push(rep.name);
@@ -11,12 +13,12 @@ module.exports = function (set, callback) {
       function preload () {
         var ext = extensions.pop();
         if (ext)
-          return img.src = "rep/"+rep.name+"/"+ext
-        misses.push(rep.name);
-        done();
+          img.src = "rep/"+rep.name+"."+ext;
+        else
+          done();
       }
       img.onload = function () {
-        rep.src = img.src
+        rep.src = img.src;
         done();
       };
       img.onerror = preload;

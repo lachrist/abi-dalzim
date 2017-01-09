@@ -27,14 +27,15 @@ window.onload = function () {
     }
     total = set.reduce(function (acc, rep) { return acc + rep.duration }, 0);
     cache.total.innerText = Math.ceil(total/60)+"min";
-    cache.start.disabled = true;
+    cache.control.disabled = true;
     if (set.length) {
       cache.set.disabled = true;
-      Preload(set, function (misses) {
+      Preload(set, function () {
         cache.set.disabled = false;
+        var misses = set.filter(function (rep) { return rep.src === undefined }).map(function (rep) { return rep.name });
         misses.length
           ? alert("Missing:\n  "+misses.join("\n  "))
-          : (cache.start.disabled = false);
+          : (cache.control.disabled = false);
       });
     }
   };
@@ -42,7 +43,7 @@ window.onload = function () {
   cache.set.onchange();
   function start () {
     cache.set.disabled = true;
-    cache.start.innerText = "Pause";
+    cache.control.innerText = "Pause";
     function next (index, elapsed) {
       cache.rep0.innerText = set[index+0] || "";
       cache.rep1.innerText = set[index+1] || "";
@@ -62,21 +63,22 @@ window.onload = function () {
         var cancel = Timer(cache.timer, set[index].duration, function () {
           next(index+1, elapsed+set[index].duration);
         });
-        cache.start.onclick = function () {
+        cache.control.onclick = function () {
           cancel();
-          cache.start.innerText = "Resume";
-          cache.start.onclick = function () {
-            cache.start.innerText = "Pause";
+          cache.control.innerText = "Resume";
+          cache.control.onclick = function () {
+            cache.control.innerText = "Pause";
             next(index, elapsed);
           };
         }
       } else {
         cache.set.disabled = false;
-        cache.start.innerText = "Start";
-        cache.start.onclick = start;
+        cache.control.innerText = "Start";
+        cache.control.onclick = start;
       }
     }
     next(0, 0);
   }
-  cache.start.onclick = start;
+  cache.control.innerText = "Start";
+  cache.control.onclick = start;
 };

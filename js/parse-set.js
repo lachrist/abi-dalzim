@@ -41,7 +41,7 @@ var atom = (function () {
       return Parsec.then(
         Parsec.keyword("in"),
         Parsec.lift(duration, function (d) {
-          return {name:n, duration:d, count:c, src:src, toString:motion2string};
+          return {name:n, duration:d, count:c, toString:motion2string};
         }));
     });
   });
