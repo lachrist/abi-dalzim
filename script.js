@@ -61,6 +61,7 @@ window.onload = function () {
   function start () {
     cache.set.disabled = true;
     cache.control.innerText = "Pause";
+    cache.control.style.backgroundColor = "LightCoral";
     function next (index, elapsed) {
       cache.rep0.innerText = set[index+0] || "";
       cache.rep1.innerText = set[index+1] || "";
@@ -83,20 +84,24 @@ window.onload = function () {
         cache.control.onclick = function () {
           cancel();
           cache.control.innerText = "Resume";
+          cache.control.style.backgroundColor = "LightBlue";
           cache.control.onclick = function () {
             cache.control.innerText = "Pause";
+            cache.control.style.backgroundColor = "LightCoral";
             next(index, elapsed);
           };
         }
       } else {
         cache.set.disabled = false;
         cache.control.innerText = "Start";
+        cache.control.style.backgroundColor = "LightGreen";
         cache.control.onclick = start;
       }
     }
     next(0, 0);
   }
   cache.control.innerText = "Start";
+  cache.control.style.backgroundColor = "LightGreen";
   cache.control.onclick = start;
 };
 
@@ -187,28 +192,40 @@ module.exports = (input) => Parsec.run(Parsec.sequence_([sum, Parsec.Spaces], 0)
 
 },{"parsecjs":10}],6:[function(require,module,exports){
 
+function apply (f) { f() }
+var exts = ["jpg", "png", "gif"];
+
+var srcs = {};
+var ongoing = {};
+
+function register (name, src) {
+  srcs[name] = src;
+  ongoing[name].forEach(apply);
+  delete ongoing[name];
+}
+
+function load (name, index) {
+  if (index === exts.length)
+    return register(name, null);
+  var image = new Image();
+  image.onerror = function () { load(name, index+1) };
+  image.onload = function () { register(name, image.src) };
+  image.src = "rep/"+name+"."+exts[index];
+}
+
 module.exports = function (set, callback) {
   var progress = 0;
-  function done () {
-    progress++
-    (progress === set.length) && callback();
-  }
   set.forEach(function (rep) {
-    var extensions = ["gif", "png", "jpg"];
-    var img = new Image();
-    function preload () {
-      var ext = extensions.pop();
-      if (ext)
-        img.src = "rep/"+rep.name+"."+ext;
-      else
-        done();
+    function done () {
+      srcs[rep.name] && (rep.src = srcs[rep.name]);
+      (++progress === set.length) && callback()
     }
-    img.onload = function () {
-      rep.src = img.src;
-      done();
-    };
-    img.onerror = preload;
-    preload();
+    if (rep.name in srcs)
+      return done();
+    if (rep.name in ongoing)
+      return ongoing[rep.name].push(done);
+    ongoing[rep.name] = [done];
+    load(rep.name, 0);
   });
 };
 
@@ -234,14 +251,11 @@ var slogans = [
 var pictures = [
   "media/abi-dalzim.jpg",
   "media/alexander-popov.jpg",
-  "media/katy-hosszu.gif",
+  "media/katy-hosszu.jpg",
   "media/swimming-1.jpg",
   "media/swimming-2.jpg",
   "media/vitruvian-man.jpg"
 ];
-
-// Preload images
-pictures.forEach(function (p) { (new Image()).src = p });
 
 exports.slogan = function () { return pick(slogans) };
 

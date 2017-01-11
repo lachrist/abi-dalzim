@@ -19,14 +19,11 @@ var slogans = [
 var pictures = [
   "media/abi-dalzim.jpg",
   "media/alexander-popov.jpg",
-  "media/katy-hosszu.gif",
+  "media/katy-hosszu.jpg",
   "media/swimming-1.jpg",
   "media/swimming-2.jpg",
   "media/vitruvian-man.jpg"
 ];
-
-// Preload images
-pictures.forEach(function (p) { (new Image()).src = p });
 
 exports.slogan = function () { return pick(slogans) };
 

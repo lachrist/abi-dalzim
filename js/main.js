@@ -44,6 +44,7 @@ window.onload = function () {
   function start () {
     cache.set.disabled = true;
     cache.control.innerText = "Pause";
+    cache.control.style.backgroundColor = "LightCoral";
     function next (index, elapsed) {
       cache.rep0.innerText = set[index+0] || "";
       cache.rep1.innerText = set[index+1] || "";
@@ -66,19 +67,23 @@ window.onload = function () {
         cache.control.onclick = function () {
           cancel();
           cache.control.innerText = "Resume";
+          cache.control.style.backgroundColor = "LightBlue";
           cache.control.onclick = function () {
             cache.control.innerText = "Pause";
+            cache.control.style.backgroundColor = "LightCoral";
             next(index, elapsed);
           };
         }
       } else {
         cache.set.disabled = false;
         cache.control.innerText = "Start";
+        cache.control.style.backgroundColor = "LightGreen";
         cache.control.onclick = start;
       }
     }
     next(0, 0);
   }
   cache.control.innerText = "Start";
+  cache.control.style.backgroundColor = "LightGreen";
   cache.control.onclick = start;
 };

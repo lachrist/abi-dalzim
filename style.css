@@ -22,6 +22,16 @@ h1 {
 }
 
 /**********/
+/* editor */
+/**********/
+
+#set {
+  width: 100%;
+  font-family: inherit;
+  font-size: inherit;
+}
+
+/**********/
 /* panel1 */
 /**********/
 
@@ -34,8 +44,6 @@ h1 {
   box-sizing: border-box;
   width: 33%;
   vertical-align: center;
-  margin-top: 10px;
-  margin-bottom: 10px;
   font-family: inherit;
   font-size: inherit;
 }
@@ -45,18 +53,15 @@ h1 {
 }
 
 /**********/
-/* editor */
-/**********/
-
-#set {
-  width: 100%;
-  font-family: inherit;
-  font-size: inherit;
-}
-
-/**********/
 /* panel2 */
 /**********/
+
+#panel2 {
+  border-bottom: 1px black solid;
+  border-top: 1px black solid;
+  margin-bottom: 10px;
+  margin-top: 10px;
+}
 
 #panel2 > ol {
   display: inline-block;
@@ -77,25 +82,16 @@ h1 {
 /* panel3 */
 /**********/
 
-#panel3 {
-  border-top: 1px black solid;
-  padding-top: 10px;
-}
-
 #detail {
   box-sizing: border-box;
-  width: 70%;
-  height: 300px;
+  width: 100%;
+  max-height: 300px;
   object-fit: contain;
 }
 
 #remarks {
   display: inline-block;
   box-sizing: border-box;
-  width: 30%;
-  height: 300px;
-  margin: 0px;
-  padding-left: 25px;
   font-family: Helvetica, Arial, sans-serif;
   overflow: scroll;
 }

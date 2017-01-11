@@ -1,25 +1,37 @@
 
+function apply (f) { f() }
+var exts = ["jpg", "png", "gif"];
+
+var srcs = {};
+var ongoing = {};
+
+function register (name, src) {
+  srcs[name] = src;
+  ongoing[name].forEach(apply);
+  delete ongoing[name];
+}
+
+function load (name, index) {
+  if (index === exts.length)
+    return register(name, null);
+  var image = new Image();
+  image.onerror = function () { load(name, index+1) };
+  image.onload = function () { register(name, image.src) };
+  image.src = "rep/"+name+"."+exts[index];
+}
+
 module.exports = function (set, callback) {
   var progress = 0;
-  function done () {
-    progress++
-    (progress === set.length) && callback();
-  }
   set.forEach(function (rep) {
-    var extensions = ["gif", "png", "jpg"];
-    var img = new Image();
-    function preload () {
-      var ext = extensions.pop();
-      if (ext)
-        img.src = "rep/"+rep.name+"."+ext;
-      else
-        done();
+    function done () {
+      srcs[rep.name] && (rep.src = srcs[rep.name]);
+      (++progress === set.length) && callback()
     }
-    img.onload = function () {
-      rep.src = img.src;
-      done();
-    };
-    img.onerror = preload;
-    preload();
+    if (rep.name in srcs)
+      return done();
+    if (rep.name in ongoing)
+      return ongoing[rep.name].push(done);
+    ongoing[rep.name] = [done];
+    load(rep.name, 0);
   });
 };
